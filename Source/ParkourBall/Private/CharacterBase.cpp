@@ -4,6 +4,7 @@
 #include "CharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "ThrowableProjectile.h"
 #include "Camera/CameraComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -79,6 +80,48 @@ void ACharacterBase::Look(const FInputActionValue& Value)
 	}
 }
 
+void ACharacterBase::Throw(const FInputActionValue& Value)
+{
+	if (!AnimComplete) return;
+
+	TObjectPtr<UWorld> const World = GetWorld();
+	if (Controller != nullptr) {
+		if (World != nullptr) {
+			APlayerController* PlayerController = Cast <APlayerController>(GetController());
+			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
+			
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			AThrowableProjectile* SpawnedProjectile = World->SpawnActor<AThrowableProjectile>(ThrowableClass, GetMesh()->GetSocketLocation("ThrowableSocket"), SpawnRotation, ActorSpawnParams);
+			SpawnedProjectile->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepWorldTransform, "ThrowableSocket");
+
+			FTimerHandle ThrowableTimer;
+			FTimerDelegate TimerDel;
+			TimerDel.BindUFunction(this, FName("Release"), SpawnedProjectile);
+			GetWorldTimerManager().SetTimer(ThrowableTimer, TimerDel, 0.25f, false);
+		}
+
+		if (ThrowAnim != nullptr) {
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (AnimInstance != nullptr) {
+				AnimComplete = false;
+				float MontageLength = AnimInstance->Montage_Play(ThrowAnim, 1.0f);
+
+				FTimerHandle AnimTimer;
+				FTimerDelegate AnimTimerDel;
+				AnimTimerDel.BindUFunction(this, FName("SetAnimComplete"), true);
+				GetWorldTimerManager().SetTimer(AnimTimer, AnimTimerDel, MontageLength, false);
+			}
+		}
+	}
+}
+
+void ACharacterBase::Release(AThrowableProjectile* SpawnedProjectile)
+{
+	SpawnedProjectile->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	SpawnedProjectile->OnRelease(CameraComponent->GetForwardVector());
+}
+
 // Called to bind functionality to input
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -94,6 +137,9 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ACharacterBase::Look);
+
+		//Throwing
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Started, this, &ACharacterBase::Throw);
 	}
 	else {
 		UE_LOG(LogTemp, Error, TEXT("Missing Enhanced Input Component"));

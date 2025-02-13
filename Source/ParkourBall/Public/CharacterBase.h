@@ -7,6 +7,7 @@
 #include "CharacterBase.generated.h"
 
 class UInputComponent;
+class UInputAction;
 class USkeletalMeshComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -23,9 +24,14 @@ public:
 	// Sets default values for this character's properties
 	ACharacterBase();
 
-	/** Look Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* LookAction;
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
+	TSubclassOf<class AThrowableProjectile> ThrowableClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Projectile)
+	TObjectPtr<UAnimMontage> ThrowAnim;
+
+	UFUNCTION()
+	void SetAnimComplete(bool Value) { AnimComplete = Value; }
 
 protected:
 	// Called when the game starts or when spawned
@@ -36,6 +42,13 @@ protected:
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/*Called for throwing input*/
+	void Throw(const FInputActionValue& Value);
+
+	/*Called for throwing input*/
+	UFUNCTION()
+	void Release(AThrowableProjectile* SpawnedProjectile);
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -59,5 +72,15 @@ private:
 	/** Move Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> MoveAction;
+
+	/** Look Input Action */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> LookAction;
+	
+	/*Throw Input Action*/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> ThrowAction;
+
+	bool AnimComplete = true;
 
 };
