@@ -22,6 +22,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UMoveComponent* GetMoveComp() { return MoveComp; }
+
+	int32 StartingReverseIterations = -1;
+
+	//Will reset Reverse Iterations when linked button is hit
+	UPROPERTY(EditAnywhere)
+	bool IsElevator = false;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UBoxComponent> CollisionComp;
@@ -29,5 +37,4 @@ private:
 	TObjectPtr<UStaticMeshComponent> Mesh;
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UMoveComponent> MoveComp;
-
 };

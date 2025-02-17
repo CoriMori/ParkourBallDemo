@@ -30,6 +30,14 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Mesh;
 
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<APuzzlePlatform> LinkedPlatform; //platform that will be effected by this button
+	UPROPERTY(EditAnywhere)
+	TArray<APuzzlePlatform*> LinkedPlatforms; //platforms that will be effected by this button
+
+	bool ButtonHit = false;
+
+	UPROPERTY(EditAnywhere)
+	float ButtonResetDealy = 1.0f;
+
+	UFUNCTION()
+	void ToggleButtonHit();
 };

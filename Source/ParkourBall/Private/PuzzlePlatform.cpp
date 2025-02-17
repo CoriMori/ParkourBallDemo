@@ -15,12 +15,13 @@ APuzzlePlatform::APuzzlePlatform()
 	Mesh->SetupAttachment(GetRootComponent());
 
 	MoveComp = CreateDefaultSubobject<UMoveComponent>("Platform Movement Component");
-
-
 }
 
 void APuzzlePlatform::HandleButtonTrigger()
 {
+	if (MoveComp->GetReverseIterations() == 0 && IsElevator) {
+		MoveComp->SetReverseIterations(StartingReverseIterations);
+	}
 	MoveComp->SetCanMove(true);
 }
 
@@ -28,6 +29,7 @@ void APuzzlePlatform::HandleButtonTrigger()
 void APuzzlePlatform::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	StartingReverseIterations = MoveComp->GetReverseIterations();
 }
 
