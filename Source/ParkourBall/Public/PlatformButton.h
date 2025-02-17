@@ -4,30 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PuzzlePlatform.generated.h"
+#include "PlatformButton.generated.h"
 
 class UBoxComponent;
-class UMoveComponent;
+class APuzzlePlatform;
 UCLASS()
-class PARKOURBALL_API APuzzlePlatform : public AActor
+class PARKOURBALL_API APlatformButton : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APuzzlePlatform();
+	APlatformButton();
 
-	virtual void HandleButtonTrigger();
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 private:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleDefaultsOnly)
 	TObjectPtr<UBoxComponent> CollisionComp;
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> Mesh;
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UMoveComponent> MoveComp;
 
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<APuzzlePlatform> LinkedPlatform; //platform that will be effected by this button
 };

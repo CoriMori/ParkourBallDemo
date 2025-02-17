@@ -19,6 +19,11 @@ APuzzlePlatform::APuzzlePlatform()
 
 }
 
+void APuzzlePlatform::HandleButtonTrigger()
+{
+	MoveComp->SetCanMove(true);
+}
+
 // Called when the game starts or when spawned
 void APuzzlePlatform::BeginPlay()
 {
