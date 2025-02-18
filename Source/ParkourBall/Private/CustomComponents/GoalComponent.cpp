@@ -18,7 +18,8 @@ void UGoalComponent::BeginPlay()
 	
 }
 
-void UGoalComponent::HandleWin()
+//trigger the on win event on the hud
+void UGoalComponent::HandleWin() const
 {
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	AWinHUD* HUD = Cast<AWinHUD>(PlayerController->GetHUD());

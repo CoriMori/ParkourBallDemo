@@ -71,18 +71,13 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Platform Settings", meta = (DisplayName = "Can Rotate"))
 	bool CanRotate = false;
 
-
-
-
-	FRotator StartRotation;
-
 	UPROPERTY(EditAnywhere, Category = "Platform Rotation", meta = (DisplayName = "Rotation Velocity"))
 	FRotator RotationVelocity = FRotator(0.0f, 1.0f, 0.0f);
 
-	UPROPERTY(EditAnywhere, Category = "Platform Rotation", meta = (DisplayName = "Rotation Range"))
-	float RotationRange = 10.0f;
+	UPROPERTY(EditAnywhere, Category = "Platform Rotation", meta = (DisplayName = "Rotation Multiplier"))
+	float RotationMultiplier = 10.0f;
 
-	bool ShouldReverse() const;
+	bool AtEndOfRange() const;
 
 	float GetDistanceMoved() const;
 

@@ -81,6 +81,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> ThrowAction;
 
-	bool AnimComplete = true;
+	bool AnimComplete = true; // tracks if the throw animation is finished or not
 
 };

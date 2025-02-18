@@ -28,6 +28,7 @@ void APlatformButton::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UP
 	FTimerHandle ButtonResetHandle;
 	GetWorldTimerManager().SetTimer(ButtonResetHandle, this, &APlatformButton::ToggleButtonHit, ButtonResetDealy, false);
 
+	//trigger the button event for all linked platforms
 	if (OtherActor->IsA(AThrowableProjectile::StaticClass())) {
 		for (APuzzlePlatform* p : LinkedPlatforms) {
 			p->HandleButtonTrigger();

@@ -18,6 +18,7 @@ ACharacterBase::ACharacterBase()
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 	
+	//setup the spring arm for the camera
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("BoomArm"));
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	SpringArm->SocketOffset = FVector(0.0f, 40.0f, 80.0f); // setup default boom arm offset
@@ -80,33 +81,41 @@ void ACharacterBase::Look(const FInputActionValue& Value)
 	}
 }
 
+//Handle the throwing of a projectile
 void ACharacterBase::Throw(const FInputActionValue& Value)
 {
-	if (!AnimComplete) return;
+	if (!AnimComplete) return; //skip if the animation isn't finished yet
 
 	TObjectPtr<UWorld> const World = GetWorld();
 	if (Controller != nullptr) {
 		if (World != nullptr) {
+			//get the rotation for spawning
 			APlayerController* PlayerController = Cast <APlayerController>(GetController());
 			const FRotator SpawnRotation = PlayerController->PlayerCameraManager->GetCameraRotation();
 			
+			//spawn the projectile
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			AThrowableProjectile* SpawnedProjectile = World->SpawnActor<AThrowableProjectile>(ThrowableClass, GetMesh()->GetSocketLocation("ThrowableSocket"), SpawnRotation, ActorSpawnParams);
+			
+			//attach the projectile to the correct socket
 			SpawnedProjectile->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepWorldTransform, "ThrowableSocket");
 
+			//start the release timer
 			FTimerHandle ThrowableTimer;
 			FTimerDelegate TimerDel;
 			TimerDel.BindUFunction(this, FName("Release"), SpawnedProjectile);
 			GetWorldTimerManager().SetTimer(ThrowableTimer, TimerDel, 0.25f, false);
 		}
 
+		//play the throw animation if it's set
 		if (ThrowAnim != nullptr) {
 			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 			if (AnimInstance != nullptr) {
 				AnimComplete = false;
 				float MontageLength = AnimInstance->Montage_Play(ThrowAnim, 1.0f);
 
+				//start the animation timer
 				FTimerHandle AnimTimer;
 				FTimerDelegate AnimTimerDel;
 				AnimTimerDel.BindUFunction(this, FName("SetAnimComplete"), true);
@@ -116,6 +125,7 @@ void ACharacterBase::Throw(const FInputActionValue& Value)
 	}
 }
 
+//handle the release of a throwable projectile
 void ACharacterBase::Release(AThrowableProjectile* SpawnedProjectile)
 {
 	SpawnedProjectile->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);

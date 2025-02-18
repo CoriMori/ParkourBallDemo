@@ -21,6 +21,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-	void HandleWin();
+	void HandleWin() const;
 
 };

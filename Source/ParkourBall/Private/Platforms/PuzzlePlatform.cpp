@@ -17,6 +17,7 @@ APuzzlePlatform::APuzzlePlatform()
 	MoveComp = CreateDefaultSubobject<UMoveComponent>("Platform Movement Component");
 }
 
+//Handle what happens when a linked button is triggered
 void APuzzlePlatform::HandleButtonTrigger()
 {
 	if (MoveComp->GetReverseIterations() == 0 && IsElevator) {

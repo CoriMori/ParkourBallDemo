@@ -34,25 +34,20 @@ AThrowableProjectile::AThrowableProjectile()
 
 void AThrowableProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	//play the hit sound
 	if (HitSound != nullptr && !IsSoundPlaying) {
 		SetSoundPlaying(true);
 		UGameplayStatics::PlaySoundAtLocation(this, HitSound, GetActorLocation());
 
-		//add timer to prevent sfx overlap
+		//add timer to prevent major sfx overlap
 		FTimerHandle ThrowableSFXHandle;
 		FTimerDelegate ThrowableSFXDel;
 		ThrowableSFXDel.BindUFunction(this, FName("SetSoundPlaying"), false);
 		GetWorldTimerManager().SetTimer(ThrowableSFXHandle, ThrowableSFXDel, SFXBounceDelay, false);
 	}
-	// Only add impulse if we hit a physics
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
-	{
-		OtherComp->AddImpulseAtLocation(GetVelocity() * 100.0f, GetActorLocation());
-
-		//Destroy();
-	}
 }
 
+//handle what happens when this projectile is released from the player
 void AThrowableProjectile::OnRelease(FVector Velocity)
 {
 	ProjectileMovement->bSimulationEnabled = true;

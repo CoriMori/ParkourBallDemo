@@ -8,6 +8,7 @@ void AWinHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//create the win widget if we have one set
 	if (WinWidgetClass) {
 		WinWidget = CreateWidget<UUserWidget>(GetWorld(), WinWidgetClass);
 
@@ -24,8 +25,10 @@ void AWinHUD::DrawHUD()
 	Super::DrawHUD();
 }
 
+//show the win screen and freeze the player
 void AWinHUD::OnWin()
 {
+	if (!WinWidget) return;
 	WinWidget->SetVisibility(ESlateVisibility::Visible);
 	GetWorld()->GetFirstPlayerController()->SetPause(true);
 }

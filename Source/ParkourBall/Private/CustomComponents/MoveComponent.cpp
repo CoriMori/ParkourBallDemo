@@ -15,7 +15,6 @@ void UMoveComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	StartLocation = GetOwner()->GetActorLocation();
-	StartRotation = GetOwner()->GetActorRotation();
 	if (MoveDuration <= 0) MoveDuration = 1.0f; //default the move duration to 1 if it gets set to 0 or negative	
 }
 
@@ -32,24 +31,30 @@ void UMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorC
 void UMoveComponent::Move(const float& DeltaTime)
 {
 	if (!CanMove) return;
+	//determine where to move to
 	FVector MoveDirection = Velocity.GetSafeNormal();
 	FVector CurrentLocation = GetOwner()->GetActorLocation();
 	FVector TargetLocation = StartLocation + MoveDirection * PlatformRange;
 	float Speed = FVector::Distance(StartLocation, TargetLocation) / MoveDuration;
 
+	//move to new location
 	FVector NewLocation = FMath::VInterpConstantTo(CurrentLocation, TargetLocation, DeltaTime, Speed);
 	GetOwner()->SetActorLocation(NewLocation);
 
-	if (ShouldReverse()) {
+	//handle what happens at the end of the movement range
+	if (AtEndOfRange()) {
 		if (CanReverse) {
-			StartLocation = StartLocation + MoveDirection * PlatformRange;
-			Velocity = -Velocity;
-			HandleReverseIterations();
+			StartLocation = StartLocation + MoveDirection * PlatformRange; //update the start location to be the last target location
+			Velocity = -Velocity; //reverse the velocity
+			HandleReverseIterations(); //handle the reverse iterations
 			
+			//handle reverse delay
 			if (DelayReverse && CanMove) {
-				CanMove = false;
+				CanMove = false; //toggle movement off
+
+				//start timer
 				FTimerDelegate DelayDelegate;
-				DelayDelegate.BindUFunction(this, FName("SetCanMove"), true);
+				DelayDelegate.BindUFunction(this, FName("SetCanMove"), true); //toggle movement back on when timer finishes
 				GetOwner()->GetWorldTimerManager().SetTimer(ReverseDelayHandle, DelayDelegate, ReverseDelayDuration, false);
 			}
 		}
@@ -60,15 +65,16 @@ void UMoveComponent::Move(const float& DeltaTime)
 
 }
 
+//Rotate the owner of this component based on the Rotation Velocity
 void UMoveComponent::Rotate(const float& DeltaTime)
 {
 	if (!CanRotate) return;
-	FRotator TargetRotation = RotationVelocity * RotationRange;
+	FRotator TargetRotation = RotationVelocity * RotationMultiplier;
 	//Rotate the Platform
 	GetOwner()->AddActorLocalRotation(TargetRotation * DeltaTime);
 }
 
-bool UMoveComponent::ShouldReverse() const
+bool UMoveComponent::AtEndOfRange() const
 {
 	return GetDistanceMoved() >= PlatformRange;
 }
